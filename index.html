@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Narrative Text: The Unexpected Holiday</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,700;1,400;1,700&family=Plus+Jakarta+Sans:wght@300;400;700;800&display=swap');
+        
+        :root {
+            --primary: #6366f1;
+            --dark: #0f172a;
+        }
+
+        body {
+            font-family: 'Lora', serif;
+            background-color: var(--dark);
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .sans { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+        /* Background Effects */
+        #bg-canvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: -2;
+            transition: background 1.5s ease-in-out;
+        }
+
+        .rain {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+        .drop {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.2);
+            width: 1px; height: 40px;
+            animation: fall linear infinite;
+        }
+        @keyframes fall { to { transform: translateY(110vh); } }
+
+        /* Card Layout */
+        .main-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        @media (min-width: 768px) {
+            .main-card {
+                min-height: 85vh;
+                border-radius: 2.5rem;
+                margin: 2rem;
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .lightning-active { animation: lightningFlash 6s infinite; }
+        @keyframes lightningFlash {
+            0%, 95%, 98%, 100% { background: transparent; }
+            96%, 97% { background: rgba(255,255,255,0.3); }
+        }
+
+        .vocab {
+            color: var(--primary);
+            font-weight: 700;
+            border-bottom: 2px dashed var(--primary);
+            cursor: pointer;
+        }
+
+        .floating { animation: float 3s ease-in-out infinite; }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+
+        .custom-scroll::-webkit-scrollbar { width: 4px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    </style>
+</head>
+<body class="md:flex md:items-center md:justify-center md:min-h-screen">
+
+    <div id="bg-canvas"></div>
+    <div id="lightning-layer" class="fixed inset-0 pointer-events-none z-0"></div>
+    <div id="rain-container" class="rain"></div>
+
+    <div class="main-card w-full max-w-6xl shadow-2xl relative z-10 overflow-hidden md:flex-row">
+        
+        <div class="w-full md:w-5/12 p-6 md:p-12 flex flex-col items-center justify-center border-b md:border-b-0 md:border-r border-slate-200">
+            <div class="w-full mb-6 flex justify-between items-start sans">
+                <div>
+                    <span class="text-[9px] font-extrabold uppercase tracking-widest text-slate-400 block mb-1">Created by</span>
+                    <span class="text-sm font-bold text-slate-800">Miss Efhi Fania Sihotang</span>
+                </div>
+                <div class="md:hidden bg-indigo-100 px-3 py-1 rounded-full">
+                    <span id="mobile-progress" class="text-[10px] font-black text-indigo-600 tracking-tighter">PROGRESS: 25%</span>
+                </div>
+            </div>
+
+            <div class="emoji-container my-4 md:my-10" id="emoji-box">
+                <span id="main-emoji" class="text-8xl md:text-[10rem] block drop-shadow-xl">☁️</span>
+            </div>
+
+            <div class="text-center sans">
+                <p id="mood-text" class="text-[11px] font-bold text-slate-500 italic uppercase tracking-widest">"The clouds are gathering..."</p>
+            </div>
+
+            <div class="hidden md:block w-full mt-10">
+                <div class="flex justify-between items-center mb-2 sans">
+                    <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Adventure Progress</span>
+                    <span id="desktop-percent" class="text-[10px] font-black text-indigo-600">25%</span>
+                </div>
+                <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden border border-slate-200">
+                    <div id="progress-bar" class="h-full bg-indigo-500 transition-all duration-1000" style="width: 25%"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="w-full md:w-7/12 flex flex-col h-[60vh] md:h-auto bg-white/40">
+            <div class="p-6 md:p-10 pb-4 bg-white/60 backdrop-blur-md z-20">
+                <div class="flex justify-between items-center mb-4">
+                    <span class="sans text-[10px] font-extrabold text-indigo-600 uppercase tracking-[0.3em]">Module: Narrative Text</span>
+                    <button onclick="toggleAudio()" id="audio-btn" class="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-full shadow-lg active:scale-90 transition-all sans">
+                        <span class="text-[10px] font-black uppercase tracking-widest" id="audio-label">Listen Story</span>
+                    </button>
+                </div>
+                <h1 class="text-2xl md:text-4xl font-black text-slate-900 sans leading-none mb-1">THE UNEXPECTED HOLIDAY</h1>
+                <div class="h-1.5 w-20 bg-indigo-500 rounded-full"></div>
+            </div>
+
+            <div class="flex-grow overflow-y-auto px-6 md:px-10 py-4 custom-scroll" id="scroll-content">
+                <div id="story-content" class="fade-in pb-20">
+                    <div id="tag" class="sans inline-block px-3 py-1 bg-slate-900 text-white rounded text-[9px] font-extrabold uppercase tracking-widest mb-6">Part 1: Orientation</div>
+                    <h3 id="scene-title" class="text-lg md:text-2xl font-bold text-indigo-900 mb-6 italic leading-snug">Waiting for the Rain...</h3>
+                    <div id="text-body" class="text-base md:text-xl text-slate-700 leading-relaxed space-y-6">
+                        </div>
+                </div>
+            </div>
+
+            <div class="p-6 md:p-10 bg-white/80 border-t border-slate-100 flex items-center justify-between sans sticky bottom-0">
+                <button onclick="nav(-1)" id="prev" class="text-[11px] font-black uppercase tracking-widest text-slate-400 disabled:opacity-0 active:scale-95">← Back</button>
+                <div class="flex gap-2" id="dots"></div>
+                <button onclick="nav(1)" id="next" class="px-8 py-4 bg-slate-900 text-white rounded-2xl shadow-xl text-[11px] font-extrabold uppercase active:scale-95 transition-all">Continue</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const story = [
+            {
+                part: "Orientation (Pengenalan)",
+                title: "Everything was ready...",
+                text: `<p>One <span class="vocab" onclick="alert('Mendung / Suram')">gloomy</span> Saturday afternoon, three close friends gathered at Budi’s house: Budi, Dino, and Santi. They stood by the window, staring at the dark clouds that were <span class="vocab" onclick="alert('Berkumpul')">gathering</span> in the sky like a silent army.</p>
+                       <p>They had planned a <span class="vocab" onclick="alert('Dinanti-nanti')">long-awaited</span> hiking trip. However, nature had a different plan. Within minutes, a <span class="vocab" onclick="alert('Dahsyat')">massive</span> thunderstorm broke out, and the wind began to blow <span class="vocab" onclick="alert('Kencang')">fiercely</span> against the glass.</p>`,
+                emoji: "☁️",
+                mood: "The sky is getting dark...",
+                color: "#64748b",
+                prog: 25,
+                rain: true,
+                lightning: false,
+                float: true
+            },
+            {
+                part: "Complication (Masalah)",
+                title: "The Silence and the Storm",
+                text: `<p>"I can't believe this!" Dino shouted as he threw his bag with a loud <span class="vocab" onclick="alert('Debuman')">thud</span>. He felt <span class="vocab" onclick="alert('Frustrasi')">frustrated</span> because he wanted to test his new boots.</p>
+                       <p>Budi sighed. "The whole weekend is <span class="vocab" onclick="alert('Hancur')">ruined</span>," he muttered. Suddenly, a blinding flash hit outside, and the electricity went out, <span class="vocab" onclick="alert('Menjerumuskan')">plunging</span> the house into darkness.</p>`,
+                emoji: "⛈️",
+                mood: "The lights just went out!",
+                color: "#1e293b",
+                prog: 50,
+                rain: true,
+                lightning: true,
+                float: false
+            },
+            {
+                part: "Resolution (Solusi)",
+                title: "Finding the Golden Light",
+                text: `<p>Santi took out a small flashlight. In the corner, Budi <span class="vocab" onclick="alert('Menemukan secara tak sengaja')">stumbled upon</span> an old wooden box. Inside, they found his father’s sketchbook and <span class="vocab" onclick="alert('Arang')">charcoal</span> pencils.</p>
+                       <p>"Why don't we draw together?" Budi <span class="vocab" onclick="alert('Mensketssa')">sketched</span> the dramatic storm, while Santi taught Dino how to draw. As they drew by the candlelight, they completely <span class="vocab" onclick="alert('Lupa waktu')">lost track of time</span>.</p>`,
+                emoji: "🕯️",
+                mood: "Art is better by candlelight.",
+                color: "#92400e",
+                prog: 75,
+                rain: false,
+                lightning: false,
+                float: true
+            },
+            {
+                part: "Coda (Pesan Moral)",
+                title: "A Heartwarming Memory",
+                text: `<p>The friends realized that even though they missed the hiking trip, they found a wonderful way to spend time together. They felt a deep sense of <span class="vocab" onclick="alert('Pencapaian')">accomplishment</span>.</p>
+                       <p>They learned that an <span class="vocab" onclick="alert('Tak terduga')">unexpected</span> change of plans could lead to a beautiful memory. The holiday was just <span class="vocab" onclick="alert('Berubah')">transformed</span> into something special.</p>`,
+                emoji: "🎨",
+                mood: "A memory that lasts forever.",
+                color: "#065f46",
+                prog: 100,
+                rain: false,
+                lightning: false,
+                float: true
+            }
+        ];
+
+        let index = 0;
+        const speech = window.speechSynthesis;
+
+        function nav(dir) {
+            speech.cancel();
+            updateAudioIcon(false);
+            index += dir;
+            if (index < 0) index = 0;
+            if (index >= story.length) index = 0;
+            render();
+            document.getElementById('scroll-content').scrollTop = 0;
+        }
+
+        function toggleAudio() {
+            if (speech.speaking) {
+                speech.cancel();
+                updateAudioIcon(false);
+                return;
+            }
+            const txt = document.getElementById('text-body').innerText;
+            const utter = new SpeechSynthesisUtterance(txt);
+            utter.lang = 'en-US';
+            utter.rate = 0.85;
+            utter.onstart = () => updateAudioIcon(true);
+            utter.onend = () => updateAudioIcon(false);
+            speech.speak(utter);
+        }
+
+        function updateAudioIcon(play) {
+            const btn = document.getElementById('audio-btn');
+            const lbl = document.getElementById('audio-label');
+            if (play) {
+                btn.classList.replace('bg-indigo-600', 'bg-red-500');
+                lbl.innerText = "Stop";
+            } else {
+                btn.classList.replace('bg-red-500', 'bg-indigo-600');
+                lbl.innerText = "Listen Story";
+            }
+        }
+
+        function render() {
+            const s = story[index];
+            
+            // Visual Updates
+            document.getElementById('bg-canvas').style.backgroundColor = s.color;
+            document.getElementById('rain-container').style.opacity = s.rain ? "1" : "0";
+            document.getElementById('lightning-layer').className = s.lightning ? "fixed inset-0 pointer-events-none z-0 lightning-active" : "fixed inset-0 pointer-events-none z-0";
+            
+            document.getElementById('main-emoji').innerText = s.emoji;
+            document.getElementById('emoji-box').className = `emoji-container my-4 md:my-10 ${s.float ? 'floating' : ''}`;
+            document.getElementById('mood-text').innerText = `"${s.mood}"`;
+
+            // Content Updates
+            document.getElementById('tag').innerText = `PART ${index + 1}: ${s.part}`;
+            document.getElementById('scene-title').innerText = s.title;
+            document.getElementById('text-body').innerHTML = s.text;
+
+            // Progress Updates
+            const progStr = `${s.prog}%`;
+            document.getElementById('mobile-progress').innerText = `PROGRESS: ${progStr}`;
+            document.getElementById('desktop-percent').innerText = progStr;
+            document.getElementById('progress-bar').style.width = progStr;
+
+            // Nav Updates
+            document.getElementById('prev').style.visibility = index === 0 ? "hidden" : "visible";
+            document.getElementById('next').innerText = index === story.length - 1 ? "Start Over" : "Continue";
+            
+            const dots = document.getElementById('dots');
+            dots.innerHTML = '';
+            story.forEach((_, i) => {
+                const d = document.createElement('div');
+                d.className = `h-1.5 rounded-full transition-all duration-300 ${i === index ? 'w-6 bg-indigo-600' : 'w-1.5 bg-slate-300'}`;
+                dots.appendChild(d);
+            });
+
+            // Re-trigger Animation
+            const content = document.getElementById('story-content');
+            content.classList.remove('fade-in');
+            void content.offsetWidth;
+            content.classList.add('fade-in');
+        }
+
+        function makeRain() {
+            const container = document.getElementById('rain-container');
+            for(let i=0; i<40; i++) {
+                const d = document.createElement('div');
+                d.className = 'drop';
+                d.style.left = Math.random() * 100 + '%';
+                d.style.animationDuration = (Math.random() * 0.5 + 0.5) + 's';
+                d.style.animationDelay = Math.random() * 2 + 's';
+                container.appendChild(d);
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            makeRain();
+            render();
+        });
+    </script>
+</body>
+</html>
